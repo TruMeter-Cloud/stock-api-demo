@@ -203,16 +203,16 @@
         );
       }
 
-      const stock = data.stock || {};
+      const stock = data.data?.stock || {};
 
       document.getElementById("usaStock").textContent =
-        Math.max(0, stock.US ?? stock.USA ?? 0);
+        Math.max(0, stock.USA ?? 0);
 
       document.getElementById("ukStock").textContent =
         Math.max(0, stock.UK ?? 0);
 
       document.getElementById("myStock").textContent =
-        Math.max(0, stock.MY ?? stock.Malaysia ?? 0);
+        Math.max(0, stock.MY ?? 0);
 
       stockResult.style.display = "grid";
 
