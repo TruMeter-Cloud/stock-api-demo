@@ -42,6 +42,7 @@
       border: 1px solid #d1d5db;
       border-radius: 10px;
       font-size: 15px;
+      box-sizing: border-box;
     }
 
     button {
@@ -57,6 +58,11 @@
 
     button:hover {
       background: #4338ca;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
     }
 
     .stock-grid {
@@ -99,6 +105,12 @@
       margin-top: 16px;
       font-weight: bold;
     }
+
+    .success {
+      color: #16a34a;
+      margin-top: 16px;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -116,14 +128,15 @@
   <input
     id="itemId"
     type="text"
-    placeholder="Enter item ID e.g. FM-1001"
+    value="020973-01"
+    placeholder="Enter item ID e.g. 020973-01"
   />
 
-  <button onclick="checkStock()">
+  <button id="checkButton" onclick="checkStock()">
     Check Stock
   </button>
 
-  <div id="error" class="error"></div>
+  <div id="message"></div>
 
   <div id="stockResult" class="stock-grid" style="display:none;">
 
@@ -149,88 +162,95 @@
 </div>
 
 <script>
-
-  // ============================
-  // CONFIG
-  // ============================
-
   const API_BASE_URL = "https://stockapi-avhxcwhscfgvdgd3.z03.azurefd.net";
 
   const API_TOKEN = "stk_live_4a9ZTJ4GSZOXf3YMgk7aX7T_cvo8g2LM";
- 
-  // ============================
-  // MAIN FUNCTION
-  // ============================
+
+  function safeStockValue(value) {
+    const numberValue = Number(value);
+
+    if (Number.isNaN(numberValue) || numberValue < 0) {
+      return 0;
+    }
+
+    return numberValue;
+  }
 
   async function checkStock() {
+    const itemId = document.getElementById("itemId").value.trim();
 
-    const itemId = document
-      .getElementById("itemId")
-      .value
-      .trim();
-
-    const errorBox = document.getElementById("error");
+    const button = document.getElementById("checkButton");
+    const message = document.getElementById("message");
     const stockResult = document.getElementById("stockResult");
     const rawJson = document.getElementById("rawJson");
 
-    errorBox.textContent = "";
+    message.className = "";
+    message.textContent = "";
     stockResult.style.display = "none";
     rawJson.style.display = "none";
+    rawJson.textContent = "";
 
     if (!itemId) {
-      errorBox.textContent = "Please enter an item ID.";
+      message.className = "error";
+      message.textContent = "Please enter an item ID.";
       return;
     }
 
     try {
+      button.disabled = true;
+      button.textContent = "Checking...";
 
       const response = await fetch(
         `${API_BASE_URL}/api/getStock?item=${encodeURIComponent(itemId)}`,
         {
           method: "GET",
           headers: {
-            "X-Authorization": `Bearer ${API_TOKEN}`,
-            "Content-Type": "application/json"
+            "X-Authorization": `Bearer ${API_TOKEN}`
           }
         }
       );
 
-      const data = await response.json();
+      const text = await response.text();
 
-      if (!response.ok || data.success === false) {
-        throw new Error(
-          data?.error?.message || "API request failed."
-        );
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Response is not valid JSON: " + text);
       }
 
-      const stock = data.data?.stock || {};
+      rawJson.style.display = "block";
+      rawJson.textContent = JSON.stringify(data, null, 2);
 
-      document.getElementById("usaStock").textContent =
-        Math.max(0, stock.USA ?? 0);
+      if (!response.ok || data.success === false) {
+        throw new Error(data?.error?.message || "API request failed.");
+      }
 
-      document.getElementById("ukStock").textContent =
-        Math.max(0, stock.UK ?? 0);
+      const result = data.data || {};
+      const stock = result.stock || {};
 
-      document.getElementById("myStock").textContent =
-        Math.max(0, stock.MY ?? 0);
+      const usa = safeStockValue(stock.USA ?? stock.US ?? 0);
+      const uk = safeStockValue(stock.UK ?? 0);
+      const my = safeStockValue(stock.MY ?? stock.Malaysia ?? 0);
+
+      document.getElementById("usaStock").textContent = usa;
+      document.getElementById("ukStock").textContent = uk;
+      document.getElementById("myStock").textContent = my;
 
       stockResult.style.display = "grid";
 
-      rawJson.style.display = "block";
+      message.className = "success";
+      message.textContent = `Stock retrieved successfully for item ${result.item || itemId}.`;
 
-      rawJson.textContent =
-        JSON.stringify(data, null, 2);
-
+    } catch (err) {
+      message.className = "error";
+      message.textContent = err.message;
+    } finally {
+      button.disabled = false;
+      button.textContent = "Check Stock";
     }
-
-    catch (err) {
-
-      errorBox.textContent = err.message;
-
-    }
-
   }
-
 </script>
 
 </body>
