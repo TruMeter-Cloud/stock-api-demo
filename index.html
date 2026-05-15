@@ -2,162 +2,402 @@
 <html>
 <head>
   <title>Stock API Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f6fb;
-      padding: 40px;
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, #dbeafe, transparent 35%),
+        linear-gradient(135deg, #f8fafc, #eef2ff);
       color: #111827;
+      min-height: 100vh;
+      padding: 40px 20px;
     }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 900px;
+    .shell {
+      max-width: 1000px;
       margin: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
 
-    h1 {
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      color: #6b7280;
+    .hero {
       margin-bottom: 24px;
     }
 
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef2ff;
+      color: #4338ca;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+    }
+
+    h1 {
+      font-size: 38px;
+      margin: 0 0 8px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 16px;
+      margin: 0;
+      max-width: 680px;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
     label {
-      font-weight: bold;
+      font-weight: 800;
       display: block;
-      margin-top: 16px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      color: #334155;
     }
 
     input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 15px;
-      box-sizing: border-box;
+      padding: 14px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     }
 
     button {
-      margin-top: 20px;
-      padding: 12px 22px;
-      background: #4f46e5;
+      padding: 14px 22px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
+      min-width: 140px;
+      box-shadow: 0 12px 24px rgba(79, 70, 229, 0.22);
     }
 
     button:hover {
-      background: #4338ca;
+      transform: translateY(-1px);
     }
 
     button:disabled {
-      background: #9ca3af;
+      background: #94a3b8;
       cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .helper {
+      margin-top: 10px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .message {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      font-weight: 700;
+    }
+
+    .error {
+      display: block;
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .success {
+      display: block;
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
     }
 
     .stock-grid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-top: 24px;
     }
 
     .stock-box {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stock-box::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: -24px;
+      width: 80px;
+      height: 80px;
+      background: #eef2ff;
+      border-radius: 50%;
     }
 
     .region {
-      color: #6b7280;
+      color: #64748b;
       font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      position: relative;
+      z-index: 1;
     }
 
     .stock {
-      font-size: 34px;
-      font-weight: bold;
+      font-size: 42px;
+      font-weight: 900;
       margin-top: 8px;
+      color: #111827;
+      position: relative;
+      z-index: 1;
     }
 
-    pre {
-      background: #111827;
-      color: #d1d5db;
-      padding: 16px;
-      border-radius: 12px;
-      overflow-x: auto;
+    .stock-label {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .meta-row {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .meta {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    .meta strong {
+      display: block;
+      color: #111827;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .json-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
       margin-top: 24px;
     }
 
-    .error {
-      color: #dc2626;
-      margin-top: 16px;
-      font-weight: bold;
+    .json-title {
+      font-weight: 900;
+      color: #334155;
     }
 
-    .success {
-      color: #16a34a;
-      margin-top: 16px;
-      font-weight: bold;
+    .copy-btn {
+      min-width: auto;
+      padding: 9px 12px;
+      font-size: 13px;
+      border-radius: 10px;
+      background: #111827;
+      box-shadow: none;
+    }
+
+    pre {
+      display: none;
+      background: #0f172a;
+      color: #d1d5db;
+      padding: 18px;
+      border-radius: 18px;
+      overflow-x: auto;
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+      border: 1px solid #1e293b;
+    }
+
+    .skeleton {
+      display: none;
+      margin-top: 24px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .skeleton div {
+      height: 138px;
+      border-radius: 20px;
+      background: linear-gradient(90deg, #f1f5f9, #e2e8f0, #f1f5f9);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    @media (max-width: 720px) {
+      h1 {
+        font-size: 30px;
+      }
+
+      .form-row,
+      .stock-grid,
+      .meta-row,
+      .skeleton {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="shell">
 
-  <h1>Stock API Live Demo</h1>
-
-  <p class="subtitle">
-    Secure distributor stock lookup using API token authentication.
-  </p>
-
-  <label>Item ID</label>
-  <input
-    id="itemId"
-    type="text"
-    value="020973-01"
-    placeholder="Enter item ID e.g. 020973-01"
-  />
-
-  <button id="checkButton" onclick="checkStock()">
-    Check Stock
-  </button>
-
-  <div id="message"></div>
-
-  <div id="stockResult" class="stock-grid" style="display:none;">
-
-    <div class="stock-box">
-      <div class="region">USA</div>
-      <div id="usaStock" class="stock">0</div>
+  <div class="hero">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Live API Demo
     </div>
 
-    <div class="stock-box">
-      <div class="region">UK</div>
-      <div id="ukStock" class="stock">0</div>
-    </div>
+    <h1>Stock API Lookup</h1>
 
-    <div class="stock-box">
-      <div class="region">Malaysia</div>
-      <div id="myStock" class="stock">0</div>
-    </div>
-
+    <p class="subtitle">
+      Secure distributor stock lookup across USA, UK and Malaysia warehouses using token-based API authentication.
+    </p>
   </div>
 
-  <pre id="rawJson" style="display:none;"></pre>
+  <div class="card">
+
+    <div class="form-row">
+      <div>
+        <label for="itemId">Item ID</label>
+        <input
+          id="itemId"
+          type="text"
+          value="020973-01"
+          placeholder="Enter item ID e.g. 020973-01"
+          onkeydown="handleEnter(event)"
+        />
+        <div class="helper">
+          Example: 020973-01. Negative or missing stock values are shown as 0.
+        </div>
+      </div>
+
+      <button id="checkButton" onclick="checkStock()">
+        Check Stock
+      </button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div id="loadingSkeleton" class="skeleton">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+
+    <div id="stockResult" class="stock-grid">
+
+      <div class="stock-box">
+        <div class="region">USA</div>
+        <div id="usaStock" class="stock">0</div>
+        <div class="stock-label">Available units</div>
+      </div>
+
+      <div class="stock-box">
+        <div class="region">UK</div>
+        <div id="ukStock" class="stock">0</div>
+        <div class="stock-label">Available units</div>
+      </div>
+
+      <div class="stock-box">
+        <div class="region">Malaysia</div>
+        <div id="myStock" class="stock">0</div>
+        <div class="stock-label">Available units</div>
+      </div>
+
+    </div>
+
+    <div id="metaRow" class="meta-row">
+      <div class="meta">
+        <strong>Item</strong>
+        <span id="metaItem">—</span>
+      </div>
+
+      <div class="meta">
+        <strong>Status</strong>
+        <span id="metaStatus">Authenticated request</span>
+      </div>
+
+      <div class="meta">
+        <strong>Response</strong>
+        <span id="metaResponse">JSON received</span>
+      </div>
+    </div>
+
+    <div id="jsonHeader" class="json-header">
+      <div class="json-title">Raw API Response</div>
+      <button class="copy-btn" onclick="copyJson()">Copy JSON</button>
+    </div>
+
+    <pre id="rawJson"></pre>
+
+  </div>
 
 </div>
 
@@ -176,29 +416,52 @@
     return numberValue;
   }
 
+  function setMessage(type, text) {
+    const message = document.getElementById("message");
+    message.className = "message " + type;
+    message.textContent = text;
+  }
+
+  function resetUI() {
+    document.getElementById("message").className = "message";
+    document.getElementById("message").textContent = "";
+
+    document.getElementById("stockResult").style.display = "none";
+    document.getElementById("metaRow").style.display = "none";
+    document.getElementById("jsonHeader").style.display = "none";
+
+    const rawJson = document.getElementById("rawJson");
+    rawJson.style.display = "none";
+    rawJson.textContent = "";
+  }
+
+  function setLoading(isLoading) {
+    const button = document.getElementById("checkButton");
+    const skeleton = document.getElementById("loadingSkeleton");
+
+    button.disabled = isLoading;
+    button.textContent = isLoading ? "Checking..." : "Check Stock";
+    skeleton.style.display = isLoading ? "grid" : "none";
+  }
+
+  function handleEnter(event) {
+    if (event.key === "Enter") {
+      checkStock();
+    }
+  }
+
   async function checkStock() {
     const itemId = document.getElementById("itemId").value.trim();
 
-    const button = document.getElementById("checkButton");
-    const message = document.getElementById("message");
-    const stockResult = document.getElementById("stockResult");
-    const rawJson = document.getElementById("rawJson");
-
-    message.className = "";
-    message.textContent = "";
-    stockResult.style.display = "none";
-    rawJson.style.display = "none";
-    rawJson.textContent = "";
+    resetUI();
 
     if (!itemId) {
-      message.className = "error";
-      message.textContent = "Please enter an item ID.";
+      setMessage("error", "Please enter an item ID.");
       return;
     }
 
     try {
-      button.disabled = true;
-      button.textContent = "Checking...";
+      setLoading(true);
 
       const response = await fetch(
         `${API_BASE_URL}/api/getStock?item=${encodeURIComponent(itemId)}`,
@@ -220,7 +483,7 @@
         throw new Error("Response is not valid JSON: " + text);
       }
 
-      rawJson.style.display = "block";
+      const rawJson = document.getElementById("rawJson");
       rawJson.textContent = JSON.stringify(data, null, 2);
 
       if (!response.ok || data.success === false) {
@@ -238,18 +501,30 @@
       document.getElementById("ukStock").textContent = uk;
       document.getElementById("myStock").textContent = my;
 
-      stockResult.style.display = "grid";
+      document.getElementById("metaItem").textContent = result.item || itemId;
 
-      message.className = "success";
-      message.textContent = `Stock retrieved successfully for item ${result.item || itemId}.`;
+      document.getElementById("stockResult").style.display = "grid";
+      document.getElementById("metaRow").style.display = "grid";
+      document.getElementById("jsonHeader").style.display = "flex";
+      rawJson.style.display = "block";
+
+      setMessage("success", `Stock retrieved successfully for item ${result.item || itemId}.`);
 
     } catch (err) {
-      message.className = "error";
-      message.textContent = err.message;
+      setMessage("error", err.message);
     } finally {
-      button.disabled = false;
-      button.textContent = "Check Stock";
+      setLoading(false);
     }
+  }
+
+  async function copyJson() {
+    const rawJson = document.getElementById("rawJson").textContent;
+
+    if (!rawJson) return;
+
+    await navigator.clipboard.writeText(rawJson);
+
+    setMessage("success", "Raw JSON copied to clipboard.");
   }
 </script>
 
