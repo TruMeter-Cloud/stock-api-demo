@@ -494,7 +494,7 @@
       const stock = result.stock || {};
 
       const usa = safeStockValue(stock.USA ?? stock.US ?? 0);
-      const uk = safeStockValue(stock.UK ?? 0);
+      const uk = safeStockValue(stock.GB ?? 0);
       const my = safeStockValue(stock.MY ?? stock.Malaysia ?? 0);
 
       document.getElementById("usaStock").textContent = usa;
